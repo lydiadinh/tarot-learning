@@ -1,0 +1,275 @@
+/* ---------------- Progress ---------------- */
+
+.progress-stats {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto 40px;
+}
+
+@media (min-width: 620px) {
+  .progress-stats { grid-template-columns: repeat(4, 1fr); }
+}
+
+.pstat {
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 16px 10px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+}
+
+.pstat-ring {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 8px;
+  position: relative;
+}
+
+.pstat-ring svg {
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.pstat-ring circle {
+  fill: none;
+  stroke-width: 6;
+}
+
+.pstat-ring .track { stroke: var(--cream-deep); }
+
+.pstat.learned .fill { stroke: var(--mint-deep); }
+.pstat.weak .fill { stroke: var(--coral-deep); }
+.pstat.new .fill { stroke: var(--ink-faint); }
+.pstat.mastery .fill { stroke: var(--gold-deep); }
+
+.pstat-ring .fill {
+  transition: stroke-dashoffset 0.8s ease;
+}
+
+.pstat-value {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.92rem;
+}
+
+.pstat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.streak-banner {
+  max-width: 720px;
+  margin: 0 auto 40px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: linear-gradient(135deg, var(--gold-pale), var(--peach));
+  border-radius: var(--radius-md);
+  padding: 16px 20px;
+  color: #5c3212;
+  box-shadow: var(--shadow-sm);
+}
+
+.streak-banner .icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+}
+
+.streak-banner strong {
+  font-family: var(--font-display);
+  font-size: 1.2rem;
+  display: block;
+}
+
+.streak-banner span {
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+/* Journey path */
+.journey-wrap {
+  max-width: 880px;
+  margin: 0 auto 44px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+}
+
+.journey-track {
+  position: relative;
+  min-width: 900px;
+  padding: 30px 10px 10px;
+}
+
+.journey-node {
+  position: absolute;
+  width: 54px;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
+
+.journey-node-dot {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--paper);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 3px solid var(--cream-deep);
+  margin: 0 auto 6px;
+}
+
+.journey-node img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.journey-node.is-learned .journey-node-dot {
+  border-color: var(--mint-deep);
+}
+
+.journey-node.is-weak .journey-node-dot {
+  border-color: var(--coral-deep);
+}
+
+.journey-node.is-new .journey-node-dot {
+  filter: grayscale(0.7);
+  opacity: 0.65;
+}
+
+.journey-node-label {
+  font-size: 0.6rem;
+  font-weight: 800;
+  color: var(--ink-soft);
+  line-height: 1.15;
+}
+
+/* Achievements */
+.badge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 14px;
+  max-width: 780px;
+  margin: 0 auto 44px;
+}
+
+.badge-card {
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 20px 16px;
+  text-align: center;
+  box-shadow: var(--shadow-sm);
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+.badge-card.is-unlocked {
+  opacity: 1;
+  filter: none;
+  box-shadow: var(--shadow-md);
+}
+
+.badge-icon-wrap {
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, var(--gold-pale), var(--peach));
+  color: #5c3212;
+}
+
+.badge-icon-wrap .icon {
+  width: 28px;
+  height: 28px;
+}
+
+.badge-name {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-bottom: 4px;
+}
+
+.badge-desc {
+  font-size: 0.76rem;
+  color: var(--ink-soft);
+}
+
+.badge-status {
+  margin-top: 8px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--gold-deep);
+}
+
+/* Quiz history */
+.history-list {
+  max-width: 640px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--paper);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  box-shadow: var(--shadow-sm);
+}
+
+.history-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: var(--cream-deep);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--gold-deep);
+}
+
+.history-details {
+  flex: 1;
+}
+
+.history-mode {
+  font-weight: 800;
+  font-size: 0.86rem;
+}
+
+.history-date {
+  font-size: 0.72rem;
+  color: var(--ink-soft);
+}
+
+.history-score {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1rem;
+  color: var(--ink);
+}
