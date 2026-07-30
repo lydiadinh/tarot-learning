@@ -144,6 +144,11 @@
 
 .flash-block p {
   font-size: 0.92rem;
+  line-height: 1.6;
+  margin: 0 0 10px;
+}
+
+.flash-block p:last-child {
   margin-bottom: 0;
 }
 
