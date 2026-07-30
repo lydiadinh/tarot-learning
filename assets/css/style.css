@@ -563,6 +563,15 @@ img {
   background: rgba(231, 138, 120, 0.18);
 }
 
+.modal-text p {
+  margin: 0 0 12px;
+  line-height: 1.65;
+}
+
+.modal-text p:last-child {
+  margin-bottom: 0;
+}
+
 .modal-orientation-tabs {
   display: flex;
   gap: 8px;
