@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Học bài - Tarot Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/flashcard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="starfield"></div>
+    <header class="site-header" id="app-header"></header>
+
+    <main class="page-main">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="navStudy">Học bài</p>
+          <h1 data-i18n="studyTitle">Học bài</h1>
+        </div>
+      </div>
+
+      <div class="study-toolbar" id="study-filter"></div>
+
+      <div class="study-progress">
+        <div class="study-progress-track">
+          <div class="study-progress-fill" id="study-progress-fill" style="width:0%"></div>
+        </div>
+        <span class="study-progress-text" id="study-progress-text">0%</span>
+      </div>
+
+      <div class="flash-stage" id="flash-stage">
+        <div class="loader">
+          <div class="loader-ring"></div>
+          <span data-i18n="loading">Đang tải bộ bài...</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/flashcard.js"></script>
+</body>
+</html>

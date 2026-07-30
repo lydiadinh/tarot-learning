@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Khám phá bộ bài - Tarot Journey</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/explorer.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="starfield"></div>
+    <header class="site-header" id="app-header"></header>
+
+    <main class="page-main">
+      <div class="section-head">
+        <div>
+          <p class="eyebrow" data-i18n="navExplore">Khám phá bộ bài</p>
+          <h1 data-i18n="exploreTitle">Khám phá bộ bài</h1>
+        </div>
+      </div>
+      <p style="text-align:center;margin-top:-10px;" data-i18n="exploreSubtitle">Chạm vào từng lá bài để xem chi tiết.</p>
+
+      <div class="explorer-controls">
+        <div class="search-bar">
+          <span id="icon-search"></span>
+          <input type="search" id="search-input" data-i18n-placeholder="exploreSearchPlaceholder" placeholder="Tìm theo tên bài hoặc từ khóa" />
+        </div>
+        <div class="suit-filters" id="suit-filters"></div>
+      </div>
+
+      <p class="result-count" id="result-count"></p>
+
+      <div id="explorer-content">
+        <div class="loader">
+          <div class="loader-ring"></div>
+          <span data-i18n="loading">Đang tải bộ bài...</span>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="card-modal">
+    <div class="modal-card" id="modal-card-content"></div>
+  </div>
+
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/card-modal.js"></script>
+  <script src="assets/js/explorer.js"></script>
+</body>
+</html>

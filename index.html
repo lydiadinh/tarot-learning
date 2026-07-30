@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Tarot Journey - Hành trình học Tarot</title>
+<meta name="description" content="Ứng dụng học Tarot: ghi nhớ trọn bộ 78 lá bài qua flashcard, trắc nghiệm và bản đồ khám phá." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="assets/css/style.css" />
+<link rel="stylesheet" href="assets/css/home.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <div class="starfield"></div>
+    <div class="blob" style="width:280px;height:280px;left:-100px;top:60px;background:var(--lavender);"></div>
+    <div class="blob" style="width:220px;height:220px;right:-80px;top:220px;background:var(--mint);"></div>
+
+    <header class="site-header" id="app-header"></header>
+
+    <main class="page-main">
+      <section class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">
+            <span data-i18n="appName">Tarot Journey</span>
+          </p>
+          <h1 data-i18n="heroTitle">Hành trình học Tarot</h1>
+          <p data-i18n="heroSubtitle">Ghi nhớ trọn bộ 78 lá bài qua trải nghiệm khám phá mỗi ngày.</p>
+        </div>
+
+        <div class="orbit-wrap" id="orbit-wrap">
+          <div class="orbit-ring"></div>
+
+          <button class="orbit-center" id="orbit-center" type="button" aria-label="Rút một lá bài ngẫu nhiên">
+            <div class="orbit-center-glow"></div>
+            <div class="orbit-center-card">
+              <img id="orbit-card-image" src="" alt="" />
+            </div>
+          </button>
+
+          <a class="orbit-item" data-pos="n" href="flashcard.html">
+            <span id="icon-study"></span>
+            <span data-i18n="navStudy">Học bài</span>
+          </a>
+          <a class="orbit-item" data-pos="e" href="quiz.html">
+            <span id="icon-quiz"></span>
+            <span data-i18n="navQuiz">Trắc nghiệm</span>
+          </a>
+          <a class="orbit-item" data-pos="s" href="explorer.html">
+            <span id="icon-explore"></span>
+            <span data-i18n="navExplore">Khám phá bộ bài</span>
+          </a>
+          <a class="orbit-item" data-pos="w" href="progress.html">
+            <span id="icon-progress"></span>
+            <span data-i18n="navProgress">Tiến độ</span>
+          </a>
+        </div>
+
+        <p class="orbit-hint" data-i18n="heroCardCta">Chạm để rút một lá bài ngẫu nhiên</p>
+
+        <div class="hero-cta">
+          <a class="btn btn-primary" href="flashcard.html">
+            <span data-i18n="startStudy">Bắt đầu học</span>
+            <span id="icon-arrow"></span>
+          </a>
+        </div>
+      </section>
+
+      <section class="home-stats" id="home-stats"></section>
+
+      <section class="suit-teaser">
+        <div class="section-head">
+          <div>
+            <h2 data-i18n="navExplore">Khám phá bộ bài</h2>
+          </div>
+          <a class="btn btn-ghost btn-sm" href="explorer.html">
+            <span data-i18n="navExplore">Khám phá bộ bài</span>
+          </a>
+        </div>
+        <div class="suit-teaser-grid" id="suit-teaser-grid"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="assets/js/icons.js"></script>
+  <script src="assets/js/data.js"></script>
+  <script src="assets/js/storage.js"></script>
+  <script src="assets/js/common.js"></script>
+  <script src="assets/js/main.js"></script>
+</body>
+</html>
