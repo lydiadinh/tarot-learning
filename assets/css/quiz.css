@@ -39,15 +39,15 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  background: linear-gradient(135deg, var(--lavender), var(--sky));
-  color: #33305c;
+  background: color-mix(in srgb, var(--lavender) 32%, var(--paper));
+  color: var(--lavender-deep);
 }
 
-.mode-card:nth-child(2) .mode-icon { background: linear-gradient(135deg, var(--sky), var(--mint)); color: #1f4a52; }
-.mode-card:nth-child(3) .mode-icon { background: linear-gradient(135deg, var(--peach), var(--coral)); color: #5c3212; }
-.mode-card:nth-child(4) .mode-icon { background: linear-gradient(135deg, var(--mint), var(--gold)); color: #2f4a2a; }
-.mode-card:nth-child(5) .mode-icon { background: linear-gradient(135deg, var(--coral), var(--gold)); color: #4a1710; }
-.mode-card:nth-child(6) .mode-icon { background: linear-gradient(135deg, var(--gold), var(--lavender)); color: #3d3568; }
+.mode-card:nth-child(2) .mode-icon { background: color-mix(in srgb, var(--sky) 32%, var(--paper)); color: var(--sky-deep); }
+.mode-card:nth-child(3) .mode-icon { background: color-mix(in srgb, var(--peach) 32%, var(--paper)); color: var(--peach-deep); }
+.mode-card:nth-child(4) .mode-icon { background: color-mix(in srgb, var(--mint) 32%, var(--paper)); color: var(--mint-deep); }
+.mode-card:nth-child(5) .mode-icon { background: color-mix(in srgb, var(--coral) 32%, var(--paper)); color: var(--coral-deep); }
+.mode-card:nth-child(6) .mode-icon { background: color-mix(in srgb, var(--gold) 32%, var(--paper)); color: var(--gold-deep); }
 
 .mode-icon .icon {
   width: 24px;
