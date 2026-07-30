@@ -233,6 +233,22 @@ const TarotUI = (() => {
     { page: "progress.html", icon: "progress", label: "navProgress" },
   ];
 
+  function escapeHtml(str) {
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+  }
+
+  function paragraphs(text) {
+    return String(text)
+      .split(/\n\n+/)
+      .map((p) => p.trim())
+      .filter(Boolean)
+      .map((p) => `<p>${escapeHtml(p)}</p>`)
+      .join("");
+  }
+
   function currentPageName() {
     const path = window.location.pathname.split("/").pop();
     return path || "index.html";
@@ -314,7 +330,7 @@ const TarotUI = (() => {
     if (starfield) renderStars(starfield, 60);
   }
 
-  return { t, setLang, getLang, applyTranslations, renderHeader, renderStars, toast, init, LABELS };
+  return { t, setLang, getLang, applyTranslations, renderHeader, renderStars, toast, init, LABELS, escapeHtml, paragraphs };
 })();
 
 document.addEventListener("DOMContentLoaded", () => TarotUI.init());

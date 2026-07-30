@@ -100,7 +100,7 @@
     if (step >= 2) {
       inner += `<div class="flash-block">
           <h4>${TarotIcons.svg("upright")}<span data-i18n="studyMeaning">${TarotUI.t("studyMeaning")}</span></h4>
-          <p>${c.meaning}</p>
+          <div class="flash-text">${TarotUI.paragraphs(c.meaning)}</div>
         </div>
         <div class="flash-block">
           <h4>${TarotIcons.svg("reversed")}<span data-i18n="studyReversedKeywords">${TarotUI.t("studyReversedKeywords")}</span></h4>
@@ -111,7 +111,7 @@
     if (step >= 3) {
       inner += `<div class="flash-block">
           <h4>${TarotIcons.svg("book")}<span data-i18n="studyDescription">${TarotUI.t("studyDescription")}</span></h4>
-          <p>${c.description}</p>
+          <div class="flash-text">${TarotUI.paragraphs(c.description)}</div>
         </div>`;
     }
 
