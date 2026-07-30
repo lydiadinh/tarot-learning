@@ -36,8 +36,8 @@
   --radius-sm: 13px;
   --radius-pill: 999px;
 
-  --font-display: "Nunito", "Be Vietnam Pro", sans-serif;
-  --font-body: "Be Vietnam Pro", "Nunito", sans-serif;
+  --font-display: "Fraunces", "Be Vietnam Pro", serif;
+  --font-body: "Be Vietnam Pro", sans-serif;
 
   --header-h: 72px;
 }
@@ -66,10 +66,11 @@ body {
 
 h1, h2, h3, h4 {
   font-family: var(--font-display);
-  font-weight: 800;
+  font-optical-sizing: auto;
+  font-weight: 600;
   color: var(--ink);
   margin: 0 0 0.4em;
-  letter-spacing: -0.01em;
+  letter-spacing: -0.015em;
 }
 
 p {
@@ -182,8 +183,9 @@ img {
   align-items: center;
   gap: 8px;
   font-family: var(--font-display);
-  font-weight: 800;
-  font-size: 1.05rem;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
   color: var(--ink);
   flex-shrink: 0;
 }
@@ -298,9 +300,9 @@ img {
   border: none;
   border-radius: var(--radius-pill);
   padding: 13px 24px;
-  font-weight: 800;
+  font-weight: 700;
   font-size: 0.96rem;
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
 }
@@ -310,7 +312,7 @@ img {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--gold), var(--peach));
+  background: linear-gradient(135deg, var(--gold), var(--gold-deep));
   color: #3a2a0a;
   box-shadow: var(--shadow-sm);
 }
@@ -394,11 +396,12 @@ img {
   align-items: center;
   gap: 7px;
   color: var(--gold-deep);
-  font-weight: 800;
-  font-size: 0.78rem;
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
-  margin-bottom: 6px;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 1.05rem;
+  letter-spacing: 0;
+  margin-bottom: 2px;
 }
 
 /* ---------------- Toast ---------------- */

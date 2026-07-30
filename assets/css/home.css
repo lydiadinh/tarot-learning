@@ -24,7 +24,7 @@
   position: relative;
   width: clamp(260px, 82vw, 460px);
   aspect-ratio: 1 / 1;
-  margin: 0 auto 20px;
+  margin: 0 auto 48px;
 }
 
 .orbit-ring {
@@ -133,7 +133,7 @@
 
 .orbit-item[data-pos="n"] { top: 4%; left: 50%; }
 .orbit-item[data-pos="e"] { top: 50%; left: 96%; }
-.orbit-item[data-pos="s"] { top: 96%; left: 50%; }
+.orbit-item[data-pos="s"] { top: 93%; left: 50%; }
 .orbit-item[data-pos="w"] { top: 50%; left: 4%; }
 
 .orbit-item[data-pos="n"] .icon { color: var(--lavender-deep); }
