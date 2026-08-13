@@ -2,45 +2,81 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Tiến độ học tập - Tarot Journey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,500&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Tiến độ học tập — Huyền Bài</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/style.css" />
-<link rel="stylesheet" href="assets/css/progress.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <div class="starfield"></div>
-    <header class="site-header" id="app-header"></header>
 
-    <main class="page-main">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow" data-i18n="navProgress">Tiến độ</p>
-          <h1 data-i18n="progressTitle">Tiến độ học tập</h1>
-        </div>
-      </div>
-
-      <div id="progress-content">
-        <div class="loader">
-          <div class="loader-ring"></div>
-          <span data-i18n="loading">Đang tải bộ bài...</span>
-        </div>
-      </div>
-    </main>
+<div class="page">
+  <div class="topbar">
+    <div class="brand"><span class="brand-mark">✦</span><span data-i18n="appName">Huyền Bài</span></div>
+    <div class="lang-switch">
+      <button data-lang="vi">Tiếng Việt</button>
+      <button data-lang="en">English</button>
+    </div>
   </div>
 
-  <div class="modal-backdrop" id="card-modal">
-    <div class="modal-card" id="modal-card-content"></div>
+  <div class="container">
+    <div class="section-head">
+      <h2 data-i18n="progressTitle">Tiến độ học tập</h2>
+    </div>
+    <p style="color:var(--ink-soft);font-size:14px;margin-bottom:18px;" data-i18n="progressSub">Theo dõi hành trình ghi nhớ 78 lá bài Tarot của bạn.</p>
+
+    <div class="panel mastery-ring-wrap" id="mastery-wrap">
+      <svg class="mastery-ring" id="mastery-svg" width="96" height="96" viewBox="0 0 96 96">
+        <circle cx="48" cy="48" r="42" fill="none" stroke="var(--cream-deep)" stroke-width="10" />
+        <circle id="mastery-arc" cx="48" cy="48" r="42" fill="none" stroke="url(#grad)" stroke-width="10" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264" transform="rotate(-90 48 48)" />
+        <defs>
+          <linearGradient id="grad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="var(--gold)" />
+            <stop offset="100%" stop-color="var(--lavender-deep)" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <div>
+        <div class="mastery-num" id="mastery-num">0%</div>
+        <div class="mastery-label" data-i18n="masteryLabel">Mức độ thành thạo</div>
+      </div>
+    </div>
+
+    <div class="suit-progress-grid" id="suit-grid"></div>
+
+    <div class="section-head">
+      <h2 data-i18n="journeyTitle">Hành trình Ẩn Chính</h2>
+    </div>
+    <p style="color:var(--ink-soft);font-size:13px;margin-bottom:14px;" data-i18n="journeySub">Từ The Fool đến The World — từng bước một.</p>
+    <div class="panel journey-path">
+      <div class="journey-track" id="journey-track"></div>
+    </div>
+
+    <div class="section-head">
+      <h2 data-i18n="achievementsTitle">Huy hiệu</h2>
+    </div>
+    <div class="badge-grid" id="badge-grid"></div>
+
+    <div class="reset-row">
+      <button id="reset-btn" data-i18n="resetProgress">Đặt lại toàn bộ tiến độ</button>
+    </div>
   </div>
 
-  <script src="assets/js/icons.js"></script>
-  <script src="assets/js/data.js"></script>
-  <script src="assets/js/storage.js"></script>
-  <script src="assets/js/common.js"></script>
-  <script src="assets/js/card-modal.js"></script>
-  <script src="assets/js/progress.js"></script>
+  <nav class="bottom-nav">
+    <a href="index.html" data-page="index.html"><span class="icon">🏠</span><span data-i18n="navHome">Trang chủ</span></a>
+    <a href="flashcard.html" data-page="flashcard.html"><span class="icon">🃏</span><span data-i18n="navStudy">Học bài</span></a>
+    <a href="quiz.html" data-page="quiz.html"><span class="icon">❓</span><span data-i18n="navQuiz">Trắc nghiệm</span></a>
+    <a href="explorer.html" data-page="explorer.html"><span class="icon">🔭</span><span data-i18n="navExplorer">Khám phá</span></a>
+    <a href="progress.html" data-page="progress.html"><span class="icon">🌙</span><span data-i18n="navProgress">Tiến độ</span></a>
+  </nav>
+</div>
+
+<script src="assets/js/particles.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/progress.js"></script>
 </body>
 </html>

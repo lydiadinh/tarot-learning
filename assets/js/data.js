@@ -1,130 +1,121 @@
 /* ============================================================
-   data.js
-   Loads data/tarotMeaning.json and normalizes it into a flat,
-   predictable structure. Nothing about card names, meanings or
-   quantities is hardcoded here: everything is derived from the
-   JSON file at runtime, so the app adapts automatically if the
-   file changes (more cards, fewer cards, edited text, etc).
+   TarotData — loads data/tarotMeaning.json dynamically.
+   Everything about card counts, names, meanings is derived
+   from this file. Nothing is hardcoded.
    ============================================================ */
-
 const TarotData = (() => {
-  const DATA_URL = "data/tarotMeaning.json";
+  let cards = null; // array, normalized
+  let loadingPromise = null;
 
-  let cards = [];
-  let bySuit = {};
-  let byId = {};
-  let loaded = false;
-
-  function splitList(str) {
-    if (!str) return [];
-    return String(str)
-      .split(";")
-      .map((s) => s.trim())
-      .filter(Boolean);
+  function suitOf(card) {
+    if (String(card.type) === "1") return "major";
+    const n = card.name.toLowerCase();
+    if (n.includes("cup")) return "cups";
+    if (n.includes("wand")) return "wands";
+    if (n.includes("sword")) return "swords";
+    if (n.includes("pentacle")) return "pentacles";
+    return "minor";
   }
 
-  function joinText(value) {
-    if (Array.isArray(value)) return value.join("\n\n");
-    return value ? String(value) : "";
+  function normalize(raw) {
+    return Object.keys(raw)
+      .map((id) => {
+        const c = raw[id];
+        const arr = (v) => (Array.isArray(v) ? v : v ? [v] : []);
+        return {
+          id: String(id),
+          name: c.name || "",
+          type: String(c.type),
+          keywords: (c.keywords || "")
+            .split(";")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          reKeywords: (c.reKeywords || "")
+            .split(";")
+            .map((s) => s.trim())
+            .filter(Boolean),
+          description: arr(c.description),
+          meaning: arr(c.meaning),
+          reMeaning: arr(c.reMeaning),
+          image: c.image || `${id}.png`,
+        };
+      })
+      .map((c) => ({ ...c, suit: suitOf(c) }))
+      .sort((a, b) => Number(a.id) - Number(b.id));
   }
 
-  // Suit is derived purely from the card's name text, so the app
-  // keeps working correctly even if the JSON's internal "type"
-  // field is inconsistent or the deck size changes.
-  function deriveSuit(name) {
-    const n = name.toLowerCase();
-    if (n.includes("cups")) return "cups";
-    if (n.includes("wands")) return "wands";
-    if (n.includes("swords")) return "swords";
-    if (n.includes("pentacles")) return "pentacles";
-    return "major";
-  }
-
-  function deriveRank(name, suit) {
-    if (suit === "major") return null;
-    const parts = name.split(/ of /i);
-    return parts[0] ? parts[0].trim() : null;
-  }
-
-  function normalize(key, raw) {
-    const id = parseInt(key, 10);
-    const name = raw.name || `Card ${id}`;
-    const suit = deriveSuit(name);
-    const rank = deriveRank(name, suit);
-    const image = raw.image
-      ? `assets/images/${raw.image}`
-      : `assets/images/${id}.png`;
-
-    return {
-      id,
-      name,
-      suit,
-      rank,
-      keywords: splitList(raw.keywords),
-      reKeywords: splitList(raw.reKeywords),
-      description: joinText(raw.description),
-      meaning: joinText(raw.meaning),
-      reMeaning: joinText(raw.reMeaning),
-      image,
-    };
+  function basePath() {
+    // Works whether the app is served from root or a GitHub Pages subpath.
+    const path = window.location.pathname;
+    const dir = path.substring(0, path.lastIndexOf("/") + 1);
+    return dir;
   }
 
   async function load() {
-    if (loaded) return cards;
-    const res = await fetch(DATA_URL);
-    if (!res.ok) throw new Error("Could not load tarotMeaning.json");
-    const raw = await res.json();
-
-    cards = Object.entries(raw)
-      .map(([key, val]) => normalize(key, val))
-      .sort((a, b) => a.id - b.id);
-
-    bySuit = {};
-    byId = {};
-    cards.forEach((c) => {
-      byId[c.id] = c;
-      if (!bySuit[c.suit]) bySuit[c.suit] = [];
-      bySuit[c.suit].push(c);
-    });
-
-    loaded = true;
-    return cards;
+    if (cards) return cards;
+    if (loadingPromise) return loadingPromise;
+    loadingPromise = fetch(basePath() + "data/tarotMeaning.json")
+      .then((r) => {
+        if (!r.ok) throw new Error("Không thể tải dữ liệu bài Tarot");
+        return r.json();
+      })
+      .then((raw) => {
+        cards = normalize(raw);
+        return cards;
+      });
+    return loadingPromise;
   }
 
-  function all() {
-    return cards;
+  function imagePath(card) {
+    return basePath() + "assets/images/" + card.image;
   }
 
-  function get(id) {
-    return byId[id];
+  function getAll() {
+    return cards || [];
   }
-
-  function suits() {
-    // Order is intentional for display (Major first, then classic
-    // suit order) but the list of suits present is discovered from
-    // the data, not assumed.
-    const order = ["major", "wands", "cups", "swords", "pentacles"];
-    return order.filter((s) => bySuit[s] && bySuit[s].length);
+  function getById(id) {
+    return (cards || []).find((c) => c.id === String(id));
   }
-
-  function bySuitName(suit) {
-    return bySuit[suit] || [];
+  function getBySuit(suit) {
+    if (!suit || suit === "all") return getAll();
+    return getAll().filter((c) => c.suit === suit);
   }
-
-  function count() {
-    return cards.length;
+  function getMajor() {
+    return getBySuit("major");
   }
-
   function search(query) {
-    const q = query.trim().toLowerCase();
+    const q = (query || "").trim().toLowerCase();
     if (!q) return [];
-    return cards.filter((c) => {
+    return getAll().filter((c) => {
       if (c.name.toLowerCase().includes(q)) return true;
       if (c.keywords.some((k) => k.toLowerCase().includes(q))) return true;
       if (c.reKeywords.some((k) => k.toLowerCase().includes(q))) return true;
       return false;
     });
   }
+  function randomCard(excludeIds = []) {
+    const pool = getAll().filter((c) => !excludeIds.includes(c.id));
+    const list = pool.length ? pool : getAll();
+    return list[Math.floor(Math.random() * list.length)];
+  }
 
-  return { load, all, get, suits, bySuitName, count, search, deriveSuit };
+  const SUIT_META = {
+    major: { icon: "✦", labelVi: "Ẩn Chính", labelEn: "Major Arcana" },
+    cups: { icon: "🌊", labelVi: "Cups", labelEn: "Cups" },
+    wands: { icon: "🔥", labelVi: "Wands", labelEn: "Wands" },
+    swords: { icon: "💨", labelVi: "Swords", labelEn: "Swords" },
+    pentacles: { icon: "🌿", labelVi: "Pentacles", labelEn: "Pentacles" },
+  };
+
+  return {
+    load,
+    getAll,
+    getById,
+    getBySuit,
+    getMajor,
+    search,
+    randomCard,
+    imagePath,
+    SUIT_META,
+  };
 })();
