@@ -1,213 +1,155 @@
 /* ============================================================
-   storage.js
-   All persistence lives in LocalStorage. No backend required.
-   Also implements the weighted spaced-repetition draw used by
-   Flashcard mode, and the achievement-unlock checks.
+   TarotStorage — everything persisted to localStorage.
+   No backend. Progress = { [cardId]: { status, box, lastSeen, seenCount } }
+   status: "new" | "learned" | "review"
+   box (Leitner-style level 1-5): higher box = longer gaps = more
+   "mastered", used to weight spaced-repetition draws.
    ============================================================ */
+const TarotStorage = (() => {
+  const KEY_PROGRESS = "tarot_progress_v1";
+  const KEY_QUIZ = "tarot_quiz_history_v1";
+  const KEY_ACH = "tarot_achievements_v1";
 
-const TarotStore = (() => {
-  const KEY = "tarotJourney_v1";
-
-  const defaultState = () => ({
-    lang: "vi",
-    cardStats: {}, // id -> { status: 'new'|'learned'|'weak', seen, lastSeen }
-    quizHistory: [], // { date, mode, score, total, mistakes: [id,...] }
-    achievements: {}, // achievementId -> ISO date unlocked
-    lastVisit: null,
-    streakDays: 0,
-  });
-
-  let state = null;
-
-  function load() {
-    if (state) return state;
+  function readJSON(key, fallback) {
     try {
-      const raw = localStorage.getItem(KEY);
-      state = raw ? { ...defaultState(), ...JSON.parse(raw) } : defaultState();
-    } catch (e) {
-      state = defaultState();
+      const v = JSON.parse(localStorage.getItem(key));
+      return v || fallback;
+    } catch {
+      return fallback;
     }
-    touchStreak();
-    return state;
   }
-
-  function save() {
+  function writeJSON(key, val) {
     try {
-      localStorage.setItem(KEY, JSON.stringify(state));
-    } catch (e) {
-      /* storage unavailable, fail silently */
+      localStorage.setItem(key, JSON.stringify(val));
+    } catch {
+      /* storage unavailable — fail silently, app still works this session */
     }
   }
 
-  function touchStreak() {
-    const today = new Date().toISOString().slice(0, 10);
-    if (state.lastVisit === today) return;
-    const y = new Date();
-    y.setDate(y.getDate() - 1);
-    const yesterday = y.toISOString().slice(0, 10);
-    state.streakDays = state.lastVisit === yesterday ? state.streakDays + 1 : 1;
-    state.lastVisit = today;
-    save();
+  // ---------- Progress ----------
+  function getProgress() {
+    return readJSON(KEY_PROGRESS, {});
   }
-
-  function getLang() {
-    return load().lang;
+  function getCardProgress(id) {
+    const p = getProgress();
+    return p[id] || { status: "new", box: 1, lastSeen: null, seenCount: 0 };
   }
-
-  function setLang(lang) {
-    load().lang = lang;
-    save();
-  }
-
-  function getCardStat(id) {
-    const s = load();
-    return s.cardStats[id] || { status: "new", seen: 0, lastSeen: null };
-  }
-
-  function setCardStatus(id, status) {
-    const s = load();
-    const prev = s.cardStats[id] || { status: "new", seen: 0, lastSeen: null };
-    s.cardStats[id] = {
-      status,
-      seen: prev.seen + 1,
-      lastSeen: new Date().toISOString(),
-    };
-    save();
+  function markCard(id, remembered) {
+    const p = getProgress();
+    const cur = p[id] || { status: "new", box: 1, lastSeen: null, seenCount: 0 };
+    cur.seenCount = (cur.seenCount || 0) + 1;
+    cur.lastSeen = Date.now();
+    if (remembered) {
+      cur.status = "learned";
+      cur.box = Math.min(5, (cur.box || 1) + 1);
+    } else {
+      cur.status = "review";
+      cur.box = 1;
+    }
+    p[id] = cur;
+    writeJSON(KEY_PROGRESS, p);
     checkAchievements();
+    return cur;
   }
-
-  function statusCounts(totalCards) {
-    const s = load();
-    let learned = 0;
-    let weak = 0;
-    Object.values(s.cardStats).forEach((c) => {
-      if (c.status === "learned") learned++;
-      else if (c.status === "weak") weak++;
-    });
-    const seen = learned + weak;
+  function stats() {
+    const p = getProgress();
+    const vals = Object.values(p);
     return {
-      learned,
-      weak,
-      newCount: Math.max(totalCards - seen, 0),
-      mastery: totalCards ? Math.round((learned / totalCards) * 100) : 0,
+      learned: vals.filter((v) => v.status === "learned").length,
+      review: vals.filter((v) => v.status === "review").length,
+      studied: vals.length,
     };
   }
-
-  // Weighted pick: cards marked "weak" appear ~3x more often,
-  // "new" cards ~2x more often than already "learned" cards.
-  function weightedPick(cardPool, excludeId) {
-    const s = load();
-    const weighted = [];
-    cardPool.forEach((card) => {
-      if (card.id === excludeId) return;
-      const stat = s.cardStats[card.id];
-      let weight = 2;
-      if (stat) {
-        if (stat.status === "weak") weight = 3;
-        else if (stat.status === "learned") weight = 1;
-      }
-      for (let i = 0; i < weight; i++) weighted.push(card);
-    });
-    if (!weighted.length) return cardPool[0];
-    return weighted[Math.floor(Math.random() * weighted.length)];
+  function resetProgress() {
+    localStorage.removeItem(KEY_PROGRESS);
+    localStorage.removeItem(KEY_ACH);
+    localStorage.removeItem(KEY_QUIZ);
   }
 
-  function recordQuiz(mode, score, total, mistakeIds) {
-    const s = load();
-    s.quizHistory.push({
-      date: new Date().toISOString(),
-      mode,
-      score,
-      total,
-      mistakes: mistakeIds,
+  // ---------- Spaced repetition weighted queue ----------
+  // Cards never seen, or in "review" / low box, are weighted heavier.
+  function weightedQueue(cards) {
+    const p = getProgress();
+    const weighted = cards.map((c) => {
+      const info = p[c.id];
+      let weight = 5; // new card, high priority
+      if (info) {
+        if (info.status === "review") weight = 8;
+        else weight = Math.max(1, 6 - info.box); // mastered cards -> low weight
+      }
+      return { card: c, weight };
     });
-    if (s.quizHistory.length > 50) s.quizHistory.shift();
-    save();
+    // Weighted shuffle: repeat entries proportionally then shuffle
+    const pool = [];
+    weighted.forEach(({ card, weight }) => {
+      for (let i = 0; i < weight; i++) pool.push(card);
+    });
+    // Fisher-Yates on pool, then dedupe preserving first occurrence order
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+    const seen = new Set();
+    const ordered = [];
+    pool.forEach((c) => {
+      if (!seen.has(c.id)) {
+        seen.add(c.id);
+        ordered.push(c);
+      }
+    });
+    return ordered;
+  }
+
+  // ---------- Quiz history ----------
+  function logQuizResult(mode, correct, total) {
+    const hist = readJSON(KEY_QUIZ, []);
+    hist.push({ mode, correct, total, date: Date.now() });
+    writeJSON(KEY_QUIZ, hist.slice(-100));
     checkAchievements();
   }
-
   function getQuizHistory() {
-    return load().quizHistory;
+    return readJSON(KEY_QUIZ, []);
   }
 
-  const ACHIEVEMENTS = [
-    {
-      id: "explorer",
-      icon: "explorer",
-      vi: { name: "Nhà Thám Hiểm", desc: "Học 10 lá bài đầu tiên." },
-      en: { name: "The Explorer", desc: "Learn your first 10 cards." },
-      test: (ctx) => ctx.learned >= 10,
-    },
-    {
-      id: "pilgrim",
-      icon: "pilgrim",
-      vi: { name: "Người Hành Hương", desc: "Thông thạo toàn bộ 22 lá Ẩn Chính." },
-      en: { name: "The Pilgrim", desc: "Master all Major Arcana cards." },
-      test: (ctx) => ctx.majorLearned >= ctx.majorTotal && ctx.majorTotal > 0,
-    },
-    {
-      id: "keeper",
-      icon: "keeper",
-      vi: { name: "Người Giữ Tri Thức", desc: "Đạt 80% mức độ thông thạo." },
-      en: { name: "Keeper of Knowledge", desc: "Reach 80% overall mastery." },
-      test: (ctx) => ctx.mastery >= 80,
-    },
+  // ---------- Achievements ----------
+  const DEFS = [
+    { id: "explorer", nameKey: "achExplorerName", descKey: "achExplorerDesc", icon: "🧭", test: (s) => s.learned >= 10 },
+    { id: "pilgrim", nameKey: "achPilgrimName", descKey: "achPilgrimDesc", icon: "🕊️", test: (s, p, cards) => {
+        const major = cards.filter((c) => c.suit === "major");
+        return major.length > 0 && major.every((c) => (p[c.id] || {}).status === "learned");
+      } },
+    { id: "keeper", nameKey: "achKeeperName", descKey: "achKeeperDesc", icon: "📖", test: (s, p, cards) => cards.length > 0 && s.learned / cards.length >= 0.8 },
+    { id: "master", nameKey: "achFullName", descKey: "achFullDesc", icon: "🌟", test: (s, p, cards) => cards.length > 0 && s.learned === cards.length },
   ];
 
+  function getUnlocked() {
+    return readJSON(KEY_ACH, []);
+  }
   function checkAchievements() {
-    if (!window.TarotData) return;
-    const s = load();
-    const all = TarotData.all();
-    if (!all.length) return;
-    const counts = statusCounts(all.length);
-    const majors = TarotData.bySuitName("major");
-    const majorLearned = majors.filter(
-      (c) => s.cardStats[c.id] && s.cardStats[c.id].status === "learned"
-    ).length;
-
-    const ctx = {
-      learned: counts.learned,
-      mastery: counts.mastery,
-      majorLearned,
-      majorTotal: majors.length,
-    };
-
-    let unlockedNew = false;
-    ACHIEVEMENTS.forEach((a) => {
-      if (!s.achievements[a.id] && a.test(ctx)) {
-        s.achievements[a.id] = new Date().toISOString();
-        unlockedNew = true;
-      }
+    const cards = (window.TarotData && TarotData.getAll()) || [];
+    if (!cards.length) return getUnlocked();
+    const p = getProgress();
+    const s = stats();
+    const unlocked = new Set(getUnlocked());
+    DEFS.forEach((d) => {
+      if (d.test(s, p, cards)) unlocked.add(d.id);
     });
-    if (unlockedNew) save();
-    return unlockedNew;
-  }
-
-  function getAchievements() {
-    const s = load();
-    return ACHIEVEMENTS.map((a) => ({
-      ...a,
-      unlocked: !!s.achievements[a.id],
-      unlockedAt: s.achievements[a.id] || null,
-    }));
-  }
-
-  function getStreak() {
-    return load().streakDays;
+    const arr = Array.from(unlocked);
+    writeJSON(KEY_ACH, arr);
+    return arr;
   }
 
   return {
-    load,
-    getLang,
-    setLang,
-    getCardStat,
-    setCardStatus,
-    statusCounts,
-    weightedPick,
-    recordQuiz,
+    getProgress,
+    getCardProgress,
+    markCard,
+    stats,
+    resetProgress,
+    weightedQueue,
+    logQuizResult,
     getQuizHistory,
-    getAchievements,
+    DEFS,
+    getUnlocked,
     checkAchievements,
-    getStreak,
   };
 })();

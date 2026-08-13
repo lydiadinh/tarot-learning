@@ -2,49 +2,48 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Học bài - Tarot Journey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,500&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Học bài — Huyền Bài</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/style.css" />
-<link rel="stylesheet" href="assets/css/flashcard.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <div class="starfield"></div>
-    <header class="site-header" id="app-header"></header>
 
-    <main class="page-main">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow" data-i18n="navStudy">Học bài</p>
-          <h1 data-i18n="studyTitle">Học bài</h1>
-        </div>
-      </div>
-
-      <div class="study-toolbar" id="study-filter"></div>
-
-      <div class="study-progress">
-        <div class="study-progress-track">
-          <div class="study-progress-fill" id="study-progress-fill" style="width:0%"></div>
-        </div>
-        <span class="study-progress-text" id="study-progress-text">0%</span>
-      </div>
-
-      <div class="flash-stage" id="flash-stage">
-        <div class="loader">
-          <div class="loader-ring"></div>
-          <span data-i18n="loading">Đang tải bộ bài...</span>
-        </div>
-      </div>
-    </main>
+<div class="page">
+  <div class="topbar">
+    <div class="brand"><span class="brand-mark">✦</span><span data-i18n="appName">Huyền Bài</span></div>
+    <div class="lang-switch">
+      <button data-lang="vi">Tiếng Việt</button>
+      <button data-lang="en">English</button>
+    </div>
   </div>
 
-  <script src="assets/js/icons.js"></script>
-  <script src="assets/js/data.js"></script>
-  <script src="assets/js/storage.js"></script>
-  <script src="assets/js/common.js"></script>
-  <script src="assets/js/flashcard.js"></script>
+  <div class="container">
+    <div class="section-head">
+      <h2 data-i18n="navStudy">Học bài</h2>
+    </div>
+
+    <div class="study-shell" id="study-shell">
+      <div class="state-msg" id="loading-msg"><div class="spinner"></div><span data-i18n="loading">Đang tải bộ bài…</span></div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="index.html" data-page="index.html"><span class="icon">🏠</span><span data-i18n="navHome">Trang chủ</span></a>
+    <a href="flashcard.html" data-page="flashcard.html"><span class="icon">🃏</span><span data-i18n="navStudy">Học bài</span></a>
+    <a href="quiz.html" data-page="quiz.html"><span class="icon">❓</span><span data-i18n="navQuiz">Trắc nghiệm</span></a>
+    <a href="explorer.html" data-page="explorer.html"><span class="icon">🔭</span><span data-i18n="navExplorer">Khám phá</span></a>
+    <a href="progress.html" data-page="progress.html"><span class="icon">🌙</span><span data-i18n="navProgress">Tiến độ</span></a>
+  </nav>
+</div>
+
+<script src="assets/js/particles.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/flashcard.js"></script>
 </body>
 </html>

@@ -2,56 +2,70 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Khám phá bộ bài - Tarot Journey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,500;0,600;0,700;0,900;1,500&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Khám phá bộ bài — Huyền Bài</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/tokens.css" />
 <link rel="stylesheet" href="assets/css/style.css" />
-<link rel="stylesheet" href="assets/css/explorer.css" />
 </head>
 <body>
-  <div class="app-shell">
-    <div class="starfield"></div>
-    <header class="site-header" id="app-header"></header>
 
-    <main class="page-main">
-      <div class="section-head">
-        <div>
-          <p class="eyebrow" data-i18n="navExplore">Khám phá bộ bài</p>
-          <h1 data-i18n="exploreTitle">Khám phá bộ bài</h1>
-        </div>
-      </div>
-      <p style="text-align:center;margin-top:-10px;" data-i18n="exploreSubtitle">Chạm vào từng lá bài để xem chi tiết.</p>
-
-      <div class="explorer-controls">
-        <div class="search-bar">
-          <span id="icon-search"></span>
-          <input type="search" id="search-input" data-i18n-placeholder="exploreSearchPlaceholder" placeholder="Tìm theo tên bài hoặc từ khóa" />
-        </div>
-        <div class="suit-filters" id="suit-filters"></div>
-      </div>
-
-      <p class="result-count" id="result-count"></p>
-
-      <div id="explorer-content">
-        <div class="loader">
-          <div class="loader-ring"></div>
-          <span data-i18n="loading">Đang tải bộ bài...</span>
-        </div>
-      </div>
-    </main>
+<div class="page">
+  <div class="topbar">
+    <div class="brand"><span class="brand-mark">✦</span><span data-i18n="appName">Huyền Bài</span></div>
+    <div class="lang-switch">
+      <button data-lang="vi">Tiếng Việt</button>
+      <button data-lang="en">English</button>
+    </div>
   </div>
 
-  <div class="modal-backdrop" id="card-modal">
-    <div class="modal-card" id="modal-card-content"></div>
+  <div class="container">
+    <div class="section-head">
+      <h2 data-i18n="navExplorer">Khám phá</h2>
+      <span class="sub" id="explorer-count"></span>
+    </div>
+
+    <div class="panel search-box">
+      <span>🔎</span>
+      <input type="search" id="search-input" data-i18n-placeholder="searchPlaceholder" placeholder="Tìm theo tên hoặc từ khoá…" />
+    </div>
+
+    <div class="filter-row" id="filter-row">
+      <button class="chip active" data-suit="all" data-i18n="filterAll">Tất cả</button>
+      <button class="chip" data-suit="major" data-i18n="filterMajor">Ẩn Chính</button>
+      <button class="chip" data-suit="cups" data-i18n="filterCups">Cups</button>
+      <button class="chip" data-suit="wands" data-i18n="filterWands">Wands</button>
+      <button class="chip" data-suit="swords" data-i18n="filterSwords">Swords</button>
+      <button class="chip" data-suit="pentacles" data-i18n="filterPentacles">Pentacles</button>
+    </div>
+
+    <div id="gallery-wrap">
+      <div class="state-msg" id="loading-msg"><div class="spinner"></div><span data-i18n="loading">Đang tải bộ bài…</span></div>
+      <div class="card-gallery" id="gallery" style="display:none"></div>
+      <div class="state-msg" id="empty-msg" style="display:none" data-i18n="noResults">Không tìm thấy lá bài nào phù hợp.</div>
+    </div>
   </div>
 
-  <script src="assets/js/icons.js"></script>
-  <script src="assets/js/data.js"></script>
-  <script src="assets/js/storage.js"></script>
-  <script src="assets/js/common.js"></script>
-  <script src="assets/js/card-modal.js"></script>
-  <script src="assets/js/explorer.js"></script>
+  <nav class="bottom-nav">
+    <a href="index.html" data-page="index.html"><span class="icon">🏠</span><span data-i18n="navHome">Trang chủ</span></a>
+    <a href="flashcard.html" data-page="flashcard.html"><span class="icon">🃏</span><span data-i18n="navStudy">Học bài</span></a>
+    <a href="quiz.html" data-page="quiz.html"><span class="icon">❓</span><span data-i18n="navQuiz">Trắc nghiệm</span></a>
+    <a href="explorer.html" data-page="explorer.html"><span class="icon">🔭</span><span data-i18n="navExplorer">Khám phá</span></a>
+    <a href="progress.html" data-page="progress.html"><span class="icon">🌙</span><span data-i18n="navProgress">Tiến độ</span></a>
+  </nav>
+</div>
+
+<div class="modal-backdrop" id="modal-backdrop">
+  <div class="modal-sheet" id="modal-sheet"></div>
+</div>
+
+<script src="assets/js/particles.js"></script>
+<script src="assets/js/i18n.js"></script>
+<script src="assets/js/data.js"></script>
+<script src="assets/js/storage.js"></script>
+<script src="assets/js/nav.js"></script>
+<script src="assets/js/card-modal.js"></script>
+<script src="assets/js/explorer.js"></script>
 </body>
 </html>

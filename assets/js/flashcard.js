@@ -1,171 +1,126 @@
 /* ============================================================
-   flashcard.js
-   Learning flow: Image -> Recall -> Guess -> Reveal -> Reinforce.
-   Weak cards are drawn more often via TarotStore.weightedPick.
+   Flashcard mode — Image → Recall → Guess → Reveal → Reinforcement
    ============================================================ */
+document.addEventListener("DOMContentLoaded", async () => {
+  await TarotData.load();
 
-(async function () {
-  const SUIT_META = {
-    major: { icon: "suitMajor", nameKey: "exploreFilterMajor" },
-    wands: { icon: "suitWands", nameKey: "exploreFilterWands" },
-    cups: { icon: "suitCups", nameKey: "exploreFilterCups" },
-    swords: { icon: "suitSwords", nameKey: "exploreFilterSwords" },
-    pentacles: { icon: "suitPentacles", nameKey: "exploreFilterPentacles" },
-  };
+  const params = new URLSearchParams(window.location.search);
+  const singleId = params.get("id");
 
-  let allCards = [];
-  let pool = [];
-  let currentCard = null;
-  let step = 0; // 0..3, then judge
-  const MAX_STEP = 3;
-  let activeSuit = "all";
-
-  const stage = document.getElementById("flash-stage");
-
-  try {
-    allCards = await TarotData.load();
-  } catch (e) {
-    stage.innerHTML = `<div class="empty-state">${TarotIcons.svg("close")}<p data-i18n="errorLoad">${TarotUI.t("errorLoad")}</p></div>`;
-    return;
+  let queue;
+  if (singleId && TarotData.getById(singleId)) {
+    queue = [TarotData.getById(singleId)];
+  } else {
+    const SESSION_SIZE = 15;
+    queue = TarotStorage.weightedQueue(TarotData.getAll()).slice(0, SESSION_SIZE);
   }
 
-  function renderFilters() {
-    const mount = document.getElementById("study-filter");
-    const suits = TarotData.suits();
-    let html = `<button class="chip is-active" data-suit="all" data-i18n="studyFilterAll">${TarotUI.t("studyFilterAll")}</button>`;
-    suits.forEach((suit) => {
-      const meta = SUIT_META[suit];
-      html += `<button class="chip" data-suit="${suit}">${TarotIcons.svg(meta.icon)}<span>${TarotUI.t(meta.nameKey)}</span></button>`;
-    });
-    mount.innerHTML = html;
+  let index = 0;
+  let step = 0; // 0=image only, 1=name+kw, 2=meaning, 3=description+actions
 
-    mount.querySelectorAll(".chip").forEach((chip) => {
-      chip.addEventListener("click", () => {
-        mount.querySelectorAll(".chip").forEach((c) => c.classList.remove("is-active"));
-        chip.classList.add("is-active");
-        activeSuit = chip.dataset.suit;
-        updatePool();
-        nextCard();
-      });
-    });
-  }
+  const shell = document.getElementById("study-shell");
 
-  function updatePool() {
-    pool = activeSuit === "all" ? allCards : TarotData.bySuitName(activeSuit);
-  }
-
-  function updateProgress() {
-    const counts = TarotStore.statusCounts(pool.length);
-    const fill = document.getElementById("study-progress-fill");
-    const text = document.getElementById("study-progress-text");
-    fill.style.width = counts.mastery + "%";
-    text.textContent = `${counts.learned}/${pool.length} · ${counts.mastery}%`;
-  }
-
-  function nextCard() {
-    if (!pool.length) {
-      stage.innerHTML = `<div class="study-empty">${TarotIcons.svg("book")}<p data-i18n="exploreEmpty">${TarotUI.t("exploreEmpty")}</p></div>`;
-      return;
-    }
-    currentCard = TarotStore.weightedPick(pool, currentCard ? currentCard.id : null);
-    step = 0;
-    updateProgress();
-    renderCard();
+  function renderShell() {
+    shell.innerHTML = `
+      <div class="study-progress">
+        <div class="bar"><i id="progress-bar"></i></div>
+        <span class="count" id="progress-count"></span>
+      </div>
+      <div class="flip-stage">
+        <div class="flip-card" id="flip-card">
+          <div class="face front">
+            <img id="card-img" src="" alt="" />
+            <span class="prompt-badge" id="prompt-badge" data-i18n="studyAskRecall">${I18N.t("studyAskRecall")}</span>
+          </div>
+        </div>
+      </div>
+      <div class="reveal-stack" id="reveal-stack"></div>
+      <div class="study-controls" id="study-controls" style="display:none">
+        <button class="btn btn-review" id="btn-review">${I18N.t("btnReview")}</button>
+        <button class="btn btn-remember" id="btn-remember">${I18N.t("btnRemembered")}</button>
+      </div>
+    `;
   }
 
   function renderCard() {
-    const c = currentCard;
-    const meta = SUIT_META[c.suit];
-    let inner = `
-      <div class="flash-suit-tag">
-        <span class="suit-pill">${TarotIcons.svg(meta.icon)}<span>${TarotUI.t(meta.nameKey)}</span></span>
-      </div>
-      <div class="flash-step-label">${TarotIcons.svg("book")}<span data-step-label></span></div>
-      <div class="flash-image-frame"><img src="${c.image}" alt="${step >= 1 ? c.name : TarotUI.t('studyPrompt')}" /></div>
-    `;
-
-    if (step === 0) {
-      inner += `<p class="flash-prompt" data-i18n="studyPrompt">${TarotUI.t("studyPrompt")}</p>
-        <p class="flash-hint" data-i18n="heroCardCta">${TarotUI.t("heroCardCta")}</p>`;
+    if (index >= queue.length) {
+      renderDone();
+      return;
     }
+    step = 0;
+    renderShell();
+    const card = queue[index];
+    document.getElementById("progress-bar").style.width = `${(index / queue.length) * 100}%`;
+    document.getElementById("progress-count").textContent = `${index + 1} ${I18N.t("studyOf")} ${queue.length}`;
+    document.getElementById("card-img").src = TarotData.imagePath(card);
+    document.getElementById("card-img").alt = card.name;
 
-    if (step >= 1) {
-      inner += `<h2 class="flash-name">${c.name}</h2>
-        <div class="flash-block">
-          <h4>${TarotIcons.svg("tag")}<span data-i18n="studyKeywords">${TarotUI.t("studyKeywords")}</span></h4>
-          <ul class="keyword-list">${c.keywords.map((k) => `<li>${k}</li>`).join("")}</ul>
-        </div>`;
+    document.getElementById("flip-card").addEventListener("click", () => advanceStep(card));
+  }
+
+  function advanceStep(card) {
+    if (step >= 3) return;
+    step++;
+    const stack = document.getElementById("reveal-stack");
+    const badge = document.getElementById("prompt-badge");
+
+    if (step === 1) {
+      badge.textContent = I18N.t("revealMeaning");
+      stack.insertAdjacentHTML(
+        "beforeend",
+        `<div class="reveal-item panel">
+           <h4>${card.name}</h4>
+           <div class="kw-row">${card.keywords.map((k) => `<span class="kw">${escapeHtml(k)}</span>`).join("")}</div>
+         </div>`
+      );
+    } else if (step === 2) {
+      badge.textContent = I18N.t("revealDescription");
+      stack.insertAdjacentHTML(
+        "beforeend",
+        `<div class="reveal-item panel">
+           <h4>${I18N.t("meaning")}</h4>
+           ${card.meaning.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}
+         </div>`
+      );
+    } else if (step === 3) {
+      badge.textContent = I18N.t("askResult");
+      stack.insertAdjacentHTML(
+        "beforeend",
+        `<div class="reveal-item panel">
+           <h4>${I18N.t("description")}</h4>
+           ${card.description.map((p) => `<p>${escapeHtml(p)}</p>`).join("")}
+         </div>`
+      );
+      document.getElementById("study-controls").style.display = "flex";
+      document.getElementById("btn-remember").addEventListener("click", () => resolve(card, true));
+      document.getElementById("btn-review").addEventListener("click", () => resolve(card, false));
     }
+  }
 
-    if (step >= 2) {
-      inner += `<div class="flash-block">
-          <h4>${TarotIcons.svg("upright")}<span data-i18n="studyMeaning">${TarotUI.t("studyMeaning")}</span></h4>
-          <div class="flash-text">${TarotUI.paragraphs(c.meaning)}</div>
+  function resolve(card, remembered) {
+    TarotStorage.markCard(card.id, remembered);
+    showToast(remembered ? I18N.t("toastRemembered") : I18N.t("toastReview"));
+    index++;
+    setTimeout(renderCard, 350);
+  }
+
+  function renderDone() {
+    shell.innerHTML = `
+      <div class="state-msg panel" style="padding:44px 24px;">
+        <div style="font-size:40px;margin-bottom:10px;">🌟</div>
+        <h3 style="font-family:var(--font-display);font-size:20px;margin-bottom:8px;">${I18N.t("studyDone")}</h3>
+        <p>${I18N.t("studyDoneSub")}</p>
+        <div class="study-controls" style="margin-top:22px;max-width:320px;margin-left:auto;margin-right:auto;">
+          <a class="btn btn-ghost" href="index.html">${I18N.t("backHome")}</a>
+          <a class="btn btn-primary" href="flashcard.html">${I18N.t("studyAgain")}</a>
         </div>
-        <div class="flash-block">
-          <h4>${TarotIcons.svg("reversed")}<span data-i18n="studyReversedKeywords">${TarotUI.t("studyReversedKeywords")}</span></h4>
-          <ul class="keyword-list">${c.reKeywords.map((k) => `<li>${k}</li>`).join("")}</ul>
-        </div>`;
-    }
-
-    if (step >= 3) {
-      inner += `<div class="flash-block">
-          <h4>${TarotIcons.svg("book")}<span data-i18n="studyDescription">${TarotUI.t("studyDescription")}</span></h4>
-          <div class="flash-text">${TarotUI.paragraphs(c.description)}</div>
-        </div>`;
-    }
-
-    if (step < MAX_STEP) {
-      inner += `<div class="flash-actions">
-        <button class="btn btn-primary" id="reveal-btn">
-          <span data-i18n="studyReveal">${TarotUI.t("studyReveal")}</span>
-          ${TarotIcons.svg("arrowRight")}
-        </button>
-      </div>`;
-    } else {
-      inner += `<div class="flash-judge-actions">
-        <button class="judge-btn review" id="judge-review">
-          ${TarotIcons.svg("reversed")}
-          <span data-i18n="studyNeedsReview">${TarotUI.t("studyNeedsReview")}</span>
-        </button>
-        <button class="judge-btn remembered" id="judge-remembered">
-          ${TarotIcons.svg("check")}
-          <span data-i18n="studyRemembered">${TarotUI.t("studyRemembered")}</span>
-        </button>
-      </div>`;
-    }
-
-    stage.innerHTML = `<div class="flash-card" data-suit="${c.suit}">${inner}</div>`;
-
-    const stepLabels = ["studyStepImage", "studyStepName", "studyStepMeaning", "studyStepDescription"];
-    stage.querySelector("[data-step-label]").textContent = TarotUI.t(stepLabels[step]);
-
-    const revealBtn = document.getElementById("reveal-btn");
-    if (revealBtn) revealBtn.addEventListener("click", () => { step++; renderCard(); });
-
-    const remBtn = document.getElementById("judge-remembered");
-    const revBtn = document.getElementById("judge-review");
-    if (remBtn) remBtn.addEventListener("click", () => judge("learned"));
-    if (revBtn) revBtn.addEventListener("click", () => judge("weak"));
+      </div>
+    `;
   }
 
-  function judge(status) {
-    TarotStore.setCardStatus(currentCard.id, status);
-    if (status === "learned") {
-      TarotUI.toast(TarotUI.t("studyRemembered") + " ✓");
-    }
-    updateProgress();
-    nextCard();
+  if (!queue.length) {
+    shell.innerHTML = `<div class="state-msg">${I18N.t("noResults")}</div>`;
+    return;
   }
-
-  renderFilters();
-  updatePool();
-  nextCard();
-
-  document.addEventListener("tarot:langchange", () => {
-    renderFilters();
-    document.querySelector(`.chip[data-suit="${activeSuit}"]`)?.classList.add("is-active");
-    renderCard();
-    updateProgress();
-  });
-})();
+  renderCard();
+});
